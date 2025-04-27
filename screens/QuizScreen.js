@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { GOOGLE_API_KEY } from '@env';
 
 export default function QuizScreen({ route }) {
   const [inputText, setInputText] = useState('');
@@ -52,54 +53,83 @@ export default function QuizScreen({ route }) {
     try {
       setIsLoading(true);
       
-      // 텍스트를 문장 단위로 분리
-      const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent?key=${GOOGLE_API_KEY}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'Expo/1.0.0',
+          'X-Ios-Bundle-Identifier': 'host.exp.Exponent'
+        },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{
+              text: `다음 텍스트를 기반으로 10개의 객관식 문제를 생성해주세요. 각 문제는 4개의 보기를 가지고 있어야 하며, 정답은 반드시 보기 중 하나여야 합니다. JSON 형식으로 응답해주세요:
+            
+            {
+              "questions": [
+                {
+                  "question": "문제 내용",
+                  "options": ["보기1", "보기2", "보기3", "보기4"],
+                  "answer": "정답"
+                }
+              ]
+            }
+            
+            텍스트: ${text}`
+            }]
+          }],
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 2000,
+          }
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('API Error:', errorData);
+        throw new Error(errorData.error?.message || 'API 요청이 실패했습니다.');
+      }
+
+      const data = await response.json();
+      console.log('API Response:', data);
       
-      // 핵심 단어 추출을 위한 함수
-      const extractKeyWords = (sentence) => {
-        const words = sentence.trim().split(/\s+/);
-        return words.filter(word => 
-          word.length > 2 && 
-          !['이', '가', '을', '를', '은', '는', '의', '에', '에서', '으로', '와', '과'].includes(word)
-        );
-      };
-
-      const generatedQuestions = [];
-
-      // 각 문장에서 핵심 개념을 추출하여 문제 생성
-      for (const sentence of sentences) {
-        const keyWords = extractKeyWords(sentence);
-        if (keyWords.length > 0) {
-          const question = {
-            id: generatedQuestions.length,
-            question: generateQuestionText(sentence, keyWords[0]),
-            answer: keyWords[0],
-            options: generateOptions(keyWords[0], keyWords)
-          };
-          generatedQuestions.push(question);
-        }
+      if (!data.candidates || !data.candidates[0] || !data.candidates[0].content || !data.candidates[0].content.parts) {
+        console.error('API 응답 구조:', JSON.stringify(data, null, 2));
+        throw new Error('API 응답 형식이 예상과 다릅니다.');
       }
 
-      // 문제가 5개 미만이면 추가 문제 생성
-      while (generatedQuestions.length < 5 && generatedQuestions.length < sentences.length) {
-        const randomSentence = sentences[Math.floor(Math.random() * sentences.length)];
-        const keyWords = extractKeyWords(randomSentence);
-        
-        if (keyWords.length > 0) {
-          const question = {
-            id: generatedQuestions.length,
-            question: generateQuestionText(randomSentence, keyWords[0]),
-            answer: keyWords[0],
-            options: generateOptions(keyWords[0], keyWords)
-          };
-          generatedQuestions.push(question);
-        }
+      const generatedText = data.candidates[0].content.parts[0].text;
+      if (!generatedText) {
+        throw new Error('생성된 텍스트가 없습니다.');
       }
 
-      setQuestions(generatedQuestions);
+      // JSON 형식 추출
+      const jsonMatch = generatedText.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        throw new Error('생성된 텍스트에서 JSON을 찾을 수 없습니다.');
+      }
+
+      try {
+        const parsedQuestions = JSON.parse(jsonMatch[0]);
+        if (!parsedQuestions.questions || !Array.isArray(parsedQuestions.questions)) {
+          throw new Error('생성된 문제 형식이 올바르지 않습니다.');
+        }
+
+        // 문제에 ID 추가
+        const questionsWithIds = parsedQuestions.questions.map((q, index) => ({
+          ...q,
+          id: index
+        }));
+
+        setQuestions(questionsWithIds);
+      } catch (parseError) {
+        console.error('JSON 파싱 오류:', parseError);
+        throw new Error('생성된 문제를 파싱하는 중 오류가 발생했습니다.');
+      }
     } catch (error) {
       console.error('문제 생성 중 오류 발생:', error);
-      Alert.alert('오류', '문제 생성 중 오류가 발생했습니다.');
+      Alert.alert('오류', `문제 생성 중 오류가 발생했습니다: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
