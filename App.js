@@ -7,13 +7,18 @@ import ImageToTextScreen from './screens/ImageToTextScreen';
 import SpeechScreen from './screens/SpeechScreen';
 import SummaryScreen from './screens/SummaryScreen';
 import QuizScreen from './screens/QuizScreen';
+import LoginScreen from './screens/LoginScreen';
+import SignupScreen from './screens/SignupScreen';
+
 
 const Stack = createStackNavigator();
 
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="MainMenu">
+      <Stack.Navigator initialRouteName="Login">
+        <Stack.Screen name="Login" component={LoginScreen} options={{ title: '로그인' }} />
+        <Stack.Screen name="Signup" component={SignupScreen} options={{ title: '회원가입' }} />
         <Stack.Screen name="MainMenu" component={MainMenu} options={{ title: '스마트 노트' }} />
         <Stack.Screen name="Note" component={NoteScreen} options={{ title: '노트 작성' }} />
         <Stack.Screen name="ImageToText" component={ImageToTextScreen} options={{ title: '이미지 텍스트 인식' }} />
