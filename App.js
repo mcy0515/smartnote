@@ -10,6 +10,7 @@ import QuizScreen from './screens/QuizScreen';
 
 const Stack = createStackNavigator();
 
+// 메인 메뉴 화면
 export default function App() {
   return (
     <NavigationContainer>
