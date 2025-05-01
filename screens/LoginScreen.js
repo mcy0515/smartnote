@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -12,32 +12,49 @@ const LoginScreen = ({ navigation }) => {
   };
 
   const goToSignup = () => {
-    navigation.navigate('Signup');
+    navigation.navigate('Register');
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>스마트노트 로그인</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="이메일 입력"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="비밀번호 입력"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-      <Button title="로그인" onPress={handleLogin} />
-      
-      <TouchableOpacity onPress={goToSignup} style={styles.signupLink}>
-        <Text style={styles.signupText}>회원가입 하러가기</Text>
-      </TouchableOpacity>
-    </View>
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.innerContainer}>
+          <Text style={styles.title}>스마트노트 로그인</Text>
+          
+          <TextInput
+            style={styles.input}
+            placeholder="이메일 입력"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+          
+          <TextInput
+            style={styles.input}
+            placeholder="비밀번호 입력"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
+          
+          <TouchableOpacity style={styles.button} onPress={handleLogin}>
+            <Text style={styles.buttonText}>로그인</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={styles.linkButton} 
+            onPress={goToSignup}
+          >
+            <Text style={styles.linkText}>회원가입 하러가기</Text>
+          </TouchableOpacity>
+        </View>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -45,31 +62,45 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+  innerContainer: {
+    flex: 1,
     justifyContent: 'center',
-    paddingHorizontal: 30,
+    padding: 20,
   },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 40,
+    marginBottom: 30,
     textAlign: 'center',
-    color: '#4F46E5',
   },
   input: {
-    height: 50,
-    borderColor: '#ccc',
     borderWidth: 1,
-    marginBottom: 20,
-    borderRadius: 5,
-    paddingHorizontal: 15,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 15,
+    marginBottom: 15,
+    fontSize: 16,
   },
-  signupLink: {
-    marginTop: 20,
+  button: {
+    backgroundColor: '#4F46E5',
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  linkButton: {
+    marginTop: 15,
     alignItems: 'center',
   },
-  signupText: {
+  linkText: {
     color: '#4F46E5',
-    marginTop: 10,
+    fontSize: 14,
   },
 });
 
