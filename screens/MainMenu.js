@@ -6,25 +6,24 @@ export default function MainMenu({ navigation }) {
     <View style={styles.container}>
       <Text style={styles.title}>📒 스마트 노트</Text>
       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Note')}>
-  <Text style={styles.buttonText}>✏️ 노트 작성</Text>
-</TouchableOpacity>
+        <Text style={styles.buttonText}>✏️ 노트 작성</Text>
+      </TouchableOpacity>
 
-<TouchableOpacity style={styles.button} onPress={() => navigation.navigate('ImageToText')}>
-  <Text style={styles.buttonText}>📸 이미지 텍스트 인식</Text>
-</TouchableOpacity>
+      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('ImageToText')}>
+        <Text style={styles.buttonText}>📸 이미지 텍스트 인식</Text>
+      </TouchableOpacity>
 
-<TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Speech')}>
-  <Text style={styles.buttonText}>🎤 음성 인식</Text>
-</TouchableOpacity>
+      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Speech')}>
+        <Text style={styles.buttonText}>🎤 음성 인식</Text>
+      </TouchableOpacity>
 
-<TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Summary')}>
-  <Text style={styles.buttonText}>🧠 AI 요약</Text>
-</TouchableOpacity>
+      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Summary')}>
+        <Text style={styles.buttonText}>🧠 AI 요약</Text>
+      </TouchableOpacity>
 
-<TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Quiz')}>
-  <Text style={styles.buttonText}>📄 시험 문제 생성</Text>
-</TouchableOpacity>
-
+      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Quiz')}>
+        <Text style={styles.buttonText}>📄 시험 문제 생성</Text>
+      </TouchableOpacity>
     </View>
   );
 }
